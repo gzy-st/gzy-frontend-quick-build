@@ -25,12 +25,22 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/api/chat': {
+      '/api/chatHistory': {
         target: 'http://localhost:8125',
         changeOrigin: true,
         secure: false,
       },
       '/api/static': {
+        target: 'http://localhost:8125',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/deploy': {
+        target: 'http://localhost:8125',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/workflow': {
         target: 'http://localhost:8125',
         changeOrigin: true,
         secure: false,

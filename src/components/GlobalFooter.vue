@@ -1,7 +1,7 @@
 <template>
   <a-layout-footer class="footer">
     <div class="footer-content">
-      <p class="copyright">© 郭志勇零代码应用生成平台</p>
+      <p class="copyright">© gzy前端项目秒搭</p>
     </div>
   </a-layout-footer>
 </template>

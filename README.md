@@ -1,174 +1,171 @@
-# gzy AI 代码生成器 - 前端
+# gzy前端项目秒搭 - 前端
 
-这是一个基于 Vue 3 + TypeScript + Ant Design Vue 的 AI 代码生成器前端项目。用户可以通过与 AI 对话来创建网站应用、查看生成的网站应用效果、部署应用、管理个人应用等。
+基于 AI 的零代码前端应用生成平台前端项目。用户通过自然语言对话即可生成并部署 Web 应用，支持原生 HTML、多文件工程、Vue 项目三种构建模式。
 
-## 功能特性
+![gzy前端项目秒搭](src/assets/logo.jpg)
 
-### 用户功能
+## 项目架构图
 
-- 🚀 **应用创建**：输入用户提示词来创建应用
-- 💬 **AI 对话**：通过和 AI 对话生成网站应用，并实时查看效果
-- 📝 **应用管理**：修改自己的应用信息（应用名称）
-- 🗑️ **应用删除**：删除自己的应用
-- 👀 **应用查看**：查看应用详情和生成效果
-- 🚀 **应用部署**：部署应用到云端
-- 📋 **应用列表**：分页查询自己的应用列表（支持根据名称查询）
-- ⭐ **精选应用**：分页查询精选的应用列表
+```mermaid
+graph TB
+    subgraph 用户层
+        Browser[浏览器]
+    end
 
-### 管理员功能
+    subgraph 前端层
+        Vite[Vite Dev Server :5173]
+        Vue[Vue 3 + TS + Ant Design Vue]
+        Router[Vue Router]
+        Pinia[Pinia 状态管理]
+        Axios[Axios HTTP 客户端]
+    end
 
-- 🔧 **应用管理**：删除任意应用
-- ✏️ **应用编辑**：更新任意应用信息（应用名称、应用封面、优先级）
-- 📊 **应用查询**：分页查询应用列表（支持多字段查询）
-- 👁️ **应用查看**：查看任意应用详情
-- ⭐ **精选设置**：设置应用为精选（优先级99）
+    subgraph 代理层
+        Proxy[Vite Proxy /api/*]
+    end
 
-## 页面结构
+    subgraph 后端服务层
+        AppSvc[code-ai-app :8125<br/>应用/对话/部署]
+        UserSvc[code-ai-user :8124<br/>用户/登录]
+        ScreenSvc[code-ai-screenshot :8127<br/>截图/COS]
+    end
 
-### 1. 主页 (`/`)
+    subgraph 基础设施
+        Nacos[Nacos 注册中心 :8848]
+        Redis[Redis 缓存/对话记忆 :6379]
+        MySQL[(MySQL 数据库)]
+        COS[COS 对象存储]
+    end
 
-- 网站标题和描述
-- 用户提示词输入框
-- 快捷操作按钮
-- 我的应用分页列表
-- 精选应用分页列表
+    Browser --> Vite
+    Vite --> Vue
+    Vue --> Router
+    Vue --> Pinia
+    Vue --> Axios
+    Axios --> Proxy
+    Proxy --> AppSvc
+    Proxy --> UserSvc
+    AppSvc --> ScreenSvc
+    AppSvc --> Nacos
+    UserSvc --> Nacos
+    ScreenSvc --> Nacos
+    AppSvc --> Redis
+    AppSvc --> MySQL
+    ScreenSvc --> COS
+```
 
-### 2. 应用生成对话页 (`/app/chat/:id`)
+## 功能模块
 
-- 顶部栏：应用名称 + 部署按钮
-- 左侧对话区域：消息展示 + 用户输入框
-- 右侧网页展示区域：实时预览生成的网站
-- 部署成功弹窗
+### 用户端
 
-### 3. 应用管理页 (`/admin/appManage`)
+| 模块 | 说明 |
+|------|------|
+| 🏠 首页 | 应用展示、提示词输入、快捷操作、我的应用/精选应用列表 |
+| 💬 AI 对话生成 | 与 AI 多轮对话生成代码，SSE 流式实时输出，右侧实时预览 |
+| 🚀 一键部署 | 将生成的应用部署到静态服务器，获得可访问 URL |
+| 📝 应用管理 | 修改应用名称、删除应用、查看应用详情 |
+| 👀 应用预览 | iframe 实时预览生成的页面效果 |
+| 🔐 用户登录注册 | 账号注册、登录、会话管理 |
 
-- 仅管理员可见
-- 搜索表单：应用名称、创建者、生成类型
-- 应用列表表格：支持编辑、删除、精选操作
+### 管理端
 
-### 4. 应用信息修改页 (`/app/edit/:id`)
+| 模块 | 说明 |
+|------|------|
+| 📊 应用管理 | 全量应用查询、编辑、删除、设置精选 |
+| 👥 用户管理 | 用户信息查询与管理 |
+| 💬 对话管理 | 对话记录查看 |
 
-- 用户和管理员都可进入
-- 普通用户只能编辑应用名称
-- 管理员可编辑应用名称、封面、优先级
-- 应用详细信息展示
+### 代码生成模式
 
-## 技术栈
+| 模式 | 适用场景 | 产物 |
+|------|----------|------|
+| 原生 HTML | 简单单页应用（计算器、表单、展示页） | 单个 HTML 文件 |
+| 多文件模式 | 中等复杂度应用 | HTML + CSS + JS 多文件 |
+| Vue 项目模式 | 复杂交互应用 | Vue 3 + Vite 完整工程 |
 
-- **前端框架**：Vue 3 + TypeScript
-- **UI 组件库**：Ant Design Vue
-- **路由管理**：Vue Router 4
-- **状态管理**：Pinia
-- **构建工具**：Vite
-- **HTTP 客户端**：Axios
-- **时间处理**：Day.js
-- **代码规范**：ESLint + Prettier
+## 技术选型
+
+### 核心框架
+- **Vue 3.5** - 渐进式前端框架，Composition API
+- **TypeScript 5.8** - 类型安全
+- **Vite 7** - 极速构建工具
+- **Ant Design Vue 4** - 企业级 UI 组件库
+
+### 状态与路由
+- **Vue Router 4** - 前端路由管理
+- **Pinia 3** - 轻量级状态管理
+
+### 网络与工具
+- **Axios** - HTTP 客户端，统一请求拦截
+- **markdown-it** - Markdown 渲染（AI 回复展示）
+- **highlight.js** - 代码高亮
+
+### 工程化
+- **ESLint 9** - 代码检查
+- **Prettier** - 代码格式化
+- **@umijs/openapi** - 根据后端 Swagger 自动生成 TS 接口类型
 
 ## 项目结构
 
 ```
 src/
-├── api/                    # API 接口定义
-│   ├── appController.ts    # 应用相关接口
-│   ├── userController.ts   # 用户相关接口
-│   └── typings.d.ts        # 类型定义
+├── api/                    # API 接口定义（自动生成）
+├── assets/                 # 静态资源（logo、AI 头像）
 ├── components/             # 公共组件
 │   ├── GlobalHeader.vue    # 全局头部
-│   └── GlobalFooter.vue    # 全局底部
+│   ├── GlobalFooter.vue    # 全局底部
+│   ├── AppCard.vue         # 应用卡片
+│   └── MarkdownRenderer.vue
+├── config/                 # 环境配置
 ├── layouts/                # 布局组件
-│   └── BasicLayout.vue     # 基础布局
-├── pages/                  # 页面组件
+├── pages/                  # 页面
 │   ├── HomePage.vue        # 首页
-│   ├── app/                # 应用相关页面
-│   │   ├── AppChatPage.vue # 应用对话页
-│   │   └── AppEditPage.vue # 应用编辑页
+│   ├── app/                # 应用对话/编辑页
 │   ├── admin/              # 管理员页面
-│   │   ├── AppManagePage.vue # 应用管理页
-│   │   └── UserManagePage.vue # 用户管理页
-│   └── user/               # 用户页面
-│       ├── UserLoginPage.vue
-│       └── UserRegisterPage.vue
-├── stores/                 # 状态管理
-│   └── loginUser.ts        # 登录用户状态
-├── utils/                  # 工具函数
-│   ├── constants.ts        # 常量定义
-│   ├── format.ts          # 格式化工具
-│   └── validation.ts      # 验证工具
+│   └── user/               # 登录/注册页
 ├── router/                 # 路由配置
-│   └── index.ts
-└── main.ts                # 应用入口
+├── stores/                 # Pinia 状态
+└── utils/                  # 工具函数
 ```
 
-## 开发环境设置
+## 快速开始
 
-### 推荐 IDE 设置
+### 环境要求
+- Node.js >= 18
+- npm >= 9
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (需要禁用 Vetur)
-
-### 项目设置
-
+### 安装依赖
 ```sh
 npm install
 ```
 
-### 开发环境运行
-
+### 启动开发服务
 ```sh
 npm run dev
 ```
+访问 http://localhost:5173
 
-### 类型检查、编译和压缩
-
+### 构建生产版本
 ```sh
 npm run build
 ```
 
-### 代码检查
+## 环境配置
 
-```sh
-npm run lint
+`.env.development`:
+```env
+VITE_DEPLOY_DOMAIN=http://localhost:8125/api/deploy
+VITE_API_BASE_URL=/api
 ```
 
-## 业务流程
+Vite 代理配置（vite.config.ts）将 `/api/*` 转发到对应后端服务：
+- `/api/user` → code-ai-user (8124)
+- `/api/app`、`/api/chatHistory`、`/api/static`、`/api/deploy`、`/api/workflow` → code-ai-app (8125)
 
-### 1. 创建应用流程
+## 后端项目
 
-1. 用户在主页输入提示词
-2. 调用创建应用接口得到应用 ID
-3. 跳转到对话页面
-4. 自动发送初始提示词给 AI
-5. 通过 SSE 实时显示 AI 回复
-6. 生成完成后在右侧展示网站效果
-
-### 2. 部署应用流程
-
-1. 在对话页面点击部署按钮
-2. 调用后端部署接口
-3. 获取可访问的 URL 地址
-4. 显示部署成功弹窗
-
-### 3. 管理应用流程
-
-1. 管理员进入应用管理页
-2. 查看应用列表，支持搜索过滤
-3. 可以编辑、删除、设置精选
-4. 编辑跳转到应用编辑页面
-
-## 注意事项
-
-- 应用生成需要后端 AI 服务支持
-- 部署功能需要配置部署服务
-- 管理员功能需要相应的权限控制
-- 预览功能依赖后端静态资源服务
-
-## 贡献指南
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
+后端仓库：[code-ai-generate](../code-ai-generate)
 
 ## 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
+MIT

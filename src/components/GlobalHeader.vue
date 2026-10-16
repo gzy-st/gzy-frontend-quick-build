@@ -5,8 +5,8 @@
       <a-col flex="200px">
         <RouterLink to="/">
           <div class="header-left">
-            <img class="logo" src="@/assets/logo.png" alt="Logo" />
-            <h1 class="site-title">郭志勇零代码应用生成平台</h1>
+            <img class="logo" src="@/assets/logo.jpg" alt="Logo" />
+            <h1 class="site-title">gzy前端项目秒搭</h1>
           </div>
         </RouterLink>
       </a-col>

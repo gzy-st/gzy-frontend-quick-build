@@ -1,14 +1,14 @@
 <template>
   <div class="app-card" :class="{ 'app-card--featured': featured }">
-    <div class="app-preview">
+    <div class="app-preview" @click="handleViewWork">
       <img v-if="app.cover" :src="app.cover" :alt="app.appName" />
       <div v-else class="app-placeholder">
         <span>🤖</span>
       </div>
       <div class="app-overlay">
         <a-space>
-          <a-button type="primary" @click="handleViewChat">查看对话</a-button>
-          <a-button v-if="app.deployKey" type="default" @click="handleViewWork">查看作品</a-button>
+          <a-button type="primary" @click.stop="handleViewChat">查看对话</a-button>
+          <a-button type="default" :href="workUrl" target="_blank">查看作品</a-button>
         </a-space>
       </div>
     </div>
@@ -50,8 +50,23 @@ const handleViewChat = () => {
   emit('view-chat', props.app.id)
 }
 
+import { computed } from 'vue'
+import { getDeployUrl, getStaticPreviewUrl } from '@/config/env'
+
+const workUrl = computed(() => {
+  if (props.app.deployKey) {
+    return getDeployUrl(props.app.deployKey)
+  }
+  if (props.app.codeGenType && props.app.id) {
+    return getStaticPreviewUrl(props.app.codeGenType, String(props.app.id))
+  }
+  return ''
+})
+
 const handleViewWork = () => {
-  emit('view-work', props.app)
+  if (workUrl.value) {
+    window.open(workUrl.value, '_blank', 'noopener,noreferrer')
+  }
 }
 </script>
 

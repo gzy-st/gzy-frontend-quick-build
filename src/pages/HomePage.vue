@@ -4,8 +4,9 @@ import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/loginUser'
 import { addApp, listMyAppVoByPage, listGoodAppVoByPage } from '@/api/appController'
-import { getDeployUrl } from '@/config/env'
+import { getDeployUrl, getStaticPreviewUrl } from '@/config/env'
 import AppCard from '@/components/AppCard.vue'
+import { CODE_GEN_TYPE_OPTIONS } from '@/utils/codeGenTypes'
 
 const router = useRouter()
 const loginUserStore = useLoginUserStore()
@@ -13,6 +14,11 @@ const loginUserStore = useLoginUserStore()
 // 用户提示词
 const userPrompt = ref('')
 const creating = ref(false)
+const selectedCodeGenType = ref('')
+const codeGenTypeOptions = [
+  { label: 'AI 智能选择', value: '' },
+  ...CODE_GEN_TYPE_OPTIONS,
+]
 
 // 我的应用数据
 const myApps = ref<API.AppVO[]>([])
@@ -52,9 +58,11 @@ const createApp = async () => {
 
   creating.value = true
   try {
-    const res = await addApp({
-      initPrompt: userPrompt.value.trim(),
-    })
+    const addParams: any = { initPrompt: userPrompt.value.trim() }
+    if (selectedCodeGenType.value) {
+      addParams.codeGenType = selectedCodeGenType.value
+    }
+    const res = await addApp(addParams)
 
     if (res.data.code === 0 && res.data.data) {
       message.success('应用创建成功')
@@ -121,11 +129,16 @@ const viewChat = (appId: string | number | undefined) => {
   }
 }
 
-// 查看作品
+// 查看作品：优先用部署 URL，未部署则用静态预览 URL
 const viewWork = (app: API.AppVO) => {
+  let url = ''
   if (app.deployKey) {
-    const url = getDeployUrl(app.deployKey)
-    window.open(url, '_blank')
+    url = getDeployUrl(app.deployKey)
+  } else if (app.codeGenType && app.id) {
+    url = getStaticPreviewUrl(app.codeGenType, String(app.id))
+  }
+  if (url) {
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 }
 
@@ -174,6 +187,14 @@ onMounted(() => {
           :maxlength="1000"
           class="prompt-input"
         />
+        <div class="mode-selector">
+          <span class="mode-label">生成模式：</span>
+          <a-radio-group v-model:value="selectedCodeGenType" button-style="solid">
+            <a-radio-button v-for="opt in codeGenTypeOptions" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
+            </a-radio-button>
+          </a-radio-group>
+        </div>
         <div class="input-actions">
           <a-button type="primary" size="large" @click="createApp" :loading="creating">
             <template #icon>
@@ -463,6 +484,20 @@ onMounted(() => {
   background: rgba(255, 255, 255, 1);
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
+}
+
+.mode-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.mode-label {
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
 }
 
 .input-actions {
